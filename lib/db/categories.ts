@@ -51,16 +51,17 @@ const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { group: 'Other', name: 'Uncategorised',        icon: 'HelpCircle',    colour: '#6B7280', isSystem: true },
 ];
 
+// Fixed IDs so the seed is idempotent across DB reopens
+const SEED_IDS = DEFAULT_CATEGORIES.map((_, i) => `sys-cat-${String(i).padStart(3, '0')}`);
+
 export async function seedDefaultCategories(): Promise<void> {
   const db = getDB();
-  const existing = await db.categories.where('isSystem').equals(1).count();
-  if (existing > 0) return; // Already seeded
-
-  const cats: Category[] = DEFAULT_CATEGORIES.map((c) => ({
+  // Use bulkPut (upsert) so re-running is always safe
+  const cats: Category[] = DEFAULT_CATEGORIES.map((c, i) => ({
     ...c,
-    id: uuidv4(),
+    id: SEED_IDS[i],
   }));
-  await db.categories.bulkAdd(cats);
+  await db.categories.bulkPut(cats);
 }
 
 export async function getCategories(): Promise<Category[]> {
