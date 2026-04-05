@@ -47,7 +47,16 @@ export async function addTransactions(
     existing.filter(Boolean).map((t) => t!.id)
   );
 
-  const toAdd = withIds.filter((t) => !existingIds.has(t.id));
+  // Deduplicate within the batch too — two transactions in the same file
+  // can share the same hash (same date + amount + payee on the same day).
+  // Keep the first occurrence; subsequent ones count as skipped.
+  const seenInBatch = new Set<string>();
+  const toAdd = withIds.filter((t) => {
+    if (existingIds.has(t.id) || seenInBatch.has(t.id)) return false;
+    seenInBatch.add(t.id);
+    return true;
+  });
+
   if (toAdd.length > 0) {
     await db.transactions.bulkAdd(toAdd);
   }
