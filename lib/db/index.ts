@@ -20,6 +20,7 @@ export class LazyBudgetDB extends Dexie {
 
   constructor() {
     super('LazyBudgetDB');
+    // v1 — original schema
     this.version(1).stores({
       transactions:
         'id, date, accountId, categoryId, payee, importBatchId, isTransfer, categorySource',
@@ -29,6 +30,23 @@ export class LazyBudgetDB extends Dexie {
       budgets: 'id, categoryId, period, effectiveFrom',
       importBatches: 'id, accountId, importedAt',
     });
+    // v2 — transactions now use deterministic hash IDs; clear old UUID-keyed data
+    this.version(2)
+      .stores({
+        transactions:
+          'id, date, accountId, categoryId, payee, importBatchId, isTransfer, categorySource',
+        accounts: 'id, name, label',
+        categories: 'id, name, group, isSystem',
+        rules: 'id, type, matchField, categoryId, priority, createdBy',
+        budgets: 'id, categoryId, period, effectiveFrom',
+        importBatches: 'id, accountId, importedAt',
+      })
+      .upgrade(async (tx) => {
+        // Wipe transactions and import batches so they can be re-imported
+        // with the new deterministic IDs — prevents duplicates going forward
+        await tx.table('transactions').clear();
+        await tx.table('importBatches').clear();
+      });
   }
 }
 

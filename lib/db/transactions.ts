@@ -1,42 +1,58 @@
 // lib/db/transactions.ts — Transaction CRUD
 
-import { v4 as uuidv4 } from 'uuid';
 import { getDB, type Transaction } from './index';
+
+/**
+ * Deterministic transaction ID — FNV-1a hash of the four fields that
+ * uniquely identify a bank transaction.  Re-uploading the same file
+ * produces the same IDs → duplicates are silently skipped.
+ */
+export function makeTxId(
+  date: string,
+  amount: number,
+  rawPayee: string,
+  accountId: string
+): string {
+  const key = `${date}|${amount.toFixed(4)}|${rawPayee.trim().toLowerCase()}|${accountId}`;
+  // Two independent FNV-1a passes → 16 hex chars (64-bit effective uniqueness)
+  let h1 = 0x811c9dc5;
+  let h2 = 0xdeadbeef;
+  for (let i = 0; i < key.length; i++) {
+    const c = key.charCodeAt(i);
+    h1 = (Math.imul(h1 ^ c, 0x01000193)) >>> 0;
+    h2 = (Math.imul(h2 ^ (c * 31), 0x01000193)) >>> 0;
+  }
+  return h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0');
+}
 
 export async function addTransactions(
   transactions: Omit<Transaction, 'id' | 'createdAt'>[]
 ): Promise<{ added: number; skipped: number }> {
+  if (transactions.length === 0) return { added: 0, skipped: 0 };
+
   const db = getDB();
-  let added = 0;
-  let skipped = 0;
+  const now = new Date().toISOString();
 
-  for (const tx of transactions) {
-    // Duplicate detection: same date + amount + payee + accountId
-    const existing = await db.transactions
-      .where('date')
-      .equals(tx.date)
-      .and(
-        (t) =>
-          t.amount === tx.amount &&
-          t.payee === tx.payee &&
-          t.accountId === tx.accountId
-      )
-      .first();
+  // Stamp every transaction with its deterministic ID
+  const withIds: Transaction[] = transactions.map((tx) => ({
+    ...tx,
+    id: makeTxId(tx.date, tx.amount, tx.rawPayee, tx.accountId),
+    createdAt: now,
+  }));
 
-    if (existing) {
-      skipped++;
-      continue;
-    }
+  // Single bulk existence check — much faster than N individual queries
+  const ids = withIds.map((t) => t.id);
+  const existing = await db.transactions.bulkGet(ids);
+  const existingIds = new Set(
+    existing.filter(Boolean).map((t) => t!.id)
+  );
 
-    await db.transactions.add({
-      ...tx,
-      id: uuidv4(),
-      createdAt: new Date().toISOString(),
-    });
-    added++;
+  const toAdd = withIds.filter((t) => !existingIds.has(t.id));
+  if (toAdd.length > 0) {
+    await db.transactions.bulkAdd(toAdd);
   }
 
-  return { added, skipped };
+  return { added: toAdd.length, skipped: withIds.length - toAdd.length };
 }
 
 export async function getTransactions(filters?: {
