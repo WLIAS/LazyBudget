@@ -3,18 +3,20 @@
 import { getDB, type Transaction } from './index';
 
 /**
- * Deterministic transaction ID — FNV-1a hash of the four fields that
- * uniquely identify a bank transaction.  Re-uploading the same file
- * produces the same IDs → duplicates are silently skipped.
+ * Deterministic transaction ID — FNV-1a hash of the key fields plus
+ * a sequence number. The sequence number distinguishes genuinely
+ * identical transactions within the same file (same merchant, same
+ * amount, same day) while still deduplicating re-imports of the
+ * same file (same order → same seq → same ID).
  */
 export function makeTxId(
   date: string,
   amount: number,
   rawPayee: string,
-  accountId: string
+  accountId: string,
+  seq = 0
 ): string {
-  const key = `${date}|${amount.toFixed(4)}|${rawPayee.trim().toLowerCase()}|${accountId}`;
-  // Two independent FNV-1a passes → 16 hex chars (64-bit effective uniqueness)
+  const key = `${date}|${amount.toFixed(4)}|${rawPayee.trim().toLowerCase()}|${accountId}|${seq}`;
   let h1 = 0x811c9dc5;
   let h2 = 0xdeadbeef;
   for (let i = 0; i < key.length; i++) {
@@ -33,30 +35,28 @@ export async function addTransactions(
   const db = getDB();
   const now = new Date().toISOString();
 
-  // Stamp every transaction with its deterministic ID
-  const withIds: Transaction[] = transactions.map((tx) => ({
-    ...tx,
-    id: makeTxId(tx.date, tx.amount, tx.rawPayee, tx.accountId),
-    createdAt: now,
-  }));
+  // Assign deterministic IDs — identical transactions within the same
+  // batch get incrementing seq numbers so they are kept as distinct rows.
+  // Re-uploading the same file in the same order yields the same seq
+  // values → same IDs → recognised as duplicates by the bulkGet below.
+  const baseKeySeq = new Map<string, number>();
+  const withIds: Transaction[] = transactions.map((tx) => {
+    const baseKey = `${tx.date}|${tx.amount.toFixed(4)}|${tx.rawPayee.trim().toLowerCase()}|${tx.accountId}`;
+    const seq = baseKeySeq.get(baseKey) ?? 0;
+    baseKeySeq.set(baseKey, seq + 1);
+    return {
+      ...tx,
+      id: makeTxId(tx.date, tx.amount, tx.rawPayee, tx.accountId, seq),
+      createdAt: now,
+    };
+  });
 
   // Single bulk existence check — much faster than N individual queries
   const ids = withIds.map((t) => t.id);
   const existing = await db.transactions.bulkGet(ids);
-  const existingIds = new Set(
-    existing.filter(Boolean).map((t) => t!.id)
-  );
+  const existingIds = new Set(existing.filter(Boolean).map((t) => t!.id));
 
-  // Deduplicate within the batch too — two transactions in the same file
-  // can share the same hash (same date + amount + payee on the same day).
-  // Keep the first occurrence; subsequent ones count as skipped.
-  const seenInBatch = new Set<string>();
-  const toAdd = withIds.filter((t) => {
-    if (existingIds.has(t.id) || seenInBatch.has(t.id)) return false;
-    seenInBatch.add(t.id);
-    return true;
-  });
-
+  const toAdd = withIds.filter((t) => !existingIds.has(t.id));
   if (toAdd.length > 0) {
     await db.transactions.bulkAdd(toAdd);
   }
