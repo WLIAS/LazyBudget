@@ -8,6 +8,7 @@ import { LinkButton } from '@/components/ui/link-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getDB } from '@/lib/db/index';
 import { formatMoney } from '@/lib/utils/money';
+import { useAppStore } from '@/lib/store/app-store';
 
 const LABEL_COLOURS: Record<string, string> = {
   spending:   '#60A5FA',
@@ -19,8 +20,16 @@ const LABEL_COLOURS: Record<string, string> = {
 };
 
 export default function AccountsPage() {
+  const { dateRange } = useAppStore();
   const accounts = useLiveQuery(() => getDB().accounts.toArray());
-  const transactions = useLiveQuery(() => getDB().transactions.toArray());
+  const transactions = useLiveQuery(
+    () =>
+      getDB()
+        .transactions.orderBy('date')
+        .filter((t) => t.date >= dateRange.from && t.date <= dateRange.to)
+        .toArray(),
+    [dateRange.from, dateRange.to]
+  );
 
   const stats = useMemo(() => {
     if (!accounts || !transactions) return [];
