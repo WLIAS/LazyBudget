@@ -2,13 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import type { Account } from '@/lib/db/schema';
 
 interface AccountLabellerProps {
@@ -78,18 +71,16 @@ export function AccountLabeller({
       )}
 
       {mode === 'existing' ? (
-        <Select value={selectedAccountId ?? ''} onValueChange={(v) => { if (v) onSelect(v); }}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select account…" />
-          </SelectTrigger>
-          <SelectContent>
-            {accounts.map((a) => (
-              <SelectItem key={a.id} value={a.id}>
-                {a.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <select
+          value={selectedAccountId ?? ''}
+          onChange={(e) => { if (e.target.value) onSelect(e.target.value); }}
+          className="w-full text-sm bg-input border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          <option value="" disabled>Select account…</option>
+          {accounts.map((a) => (
+            <option key={a.id} value={a.id}>{a.name}</option>
+          ))}
+        </select>
       ) : (
         <div className="space-y-3">
           <Input
@@ -97,18 +88,15 @@ export function AccountLabeller({
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <Select value={label} onValueChange={(v) => setLabel(v as Account['label'])}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LABEL_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            value={label}
+            onChange={(e) => setLabel(e.target.value as Account['label'])}
+            className="w-full text-sm bg-input border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            {LABEL_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
           <Input
             placeholder="Bank name (optional, e.g. ASB)"
             value={bankName}
