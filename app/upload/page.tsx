@@ -17,10 +17,11 @@ import { addTransactions } from '@/lib/db/transactions';
 import { getAccounts, createAccount } from '@/lib/db/accounts';
 import { getDB } from '@/lib/db/index';
 import { seedDefaultCategories } from '@/lib/db/categories';
+import { runCategorisation, type EngineProgress, type EngineResult } from '@/lib/categorisation/engine';
 import type { Transaction, Account } from '@/lib/db/schema';
 import type { BankProfile } from '@/lib/parsers/bank-profiles';
 
-type Step = 'drop' | 'map' | 'account' | 'preview' | 'importing' | 'done';
+type Step = 'drop' | 'map' | 'account' | 'preview' | 'importing' | 'categorising' | 'done';
 
 interface NewAccountData {
   name: string;
@@ -46,6 +47,8 @@ export default function UploadPage() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [newAccountData, setNewAccountData] = useState<NewAccountData | null>(null);
   const [importResult, setImportResult] = useState<{ added: number; skipped: number } | null>(null);
+  const [catProgress, setCatProgress] = useState<EngineProgress | null>(null);
+  const [catResult, setCatResult] = useState<EngineResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleFile = useCallback(async (f: File) => {
@@ -162,6 +165,17 @@ export default function UploadPage() {
       const result = await addTransactions(txsWithAccount);
       console.log('[LazyBudget] Import result:', result);
       setImportResult(result);
+
+      // Run categorisation pipeline
+      setStep('categorising');
+      try {
+        const engineResult = await runCategorisation(batchId, (p) => setCatProgress(p));
+        setCatResult(engineResult);
+      } catch (e) {
+        console.error('[LazyBudget] Categorisation error:', e);
+        // Non-fatal — still show done screen
+      }
+
       setStep('done');
     } catch (e) {
       console.error('[LazyBudget] Import error:', e);
@@ -181,6 +195,8 @@ export default function UploadPage() {
     setSelectedAccountId(null);
     setNewAccountData(null);
     setImportResult(null);
+    setCatProgress(null);
+    setCatResult(null);
     setError(null);
   };
 
@@ -328,9 +344,34 @@ export default function UploadPage() {
           </div>
         )}
 
+        {/* STEP: Categorising */}
+        {step === 'categorising' && (
+          <div className="flex flex-col items-center gap-5 py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium">
+                {catProgress?.phase === 'ai' ? 'AI categorising…' : 'Applying rules…'}
+              </p>
+              {catProgress && catProgress.total > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {catProgress.done.toLocaleString()} / {catProgress.total.toLocaleString()} transactions
+                </p>
+              )}
+            </div>
+            {catProgress && catProgress.total > 0 && (
+              <div className="w-64 bg-muted rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-primary h-full rounded-full transition-all duration-300"
+                  style={{ width: `${Math.round((catProgress.done / catProgress.total) * 100)}%` }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* STEP: Done */}
         {step === 'done' && importResult && (
-          <div className="rounded-xl border border-border bg-card p-8 flex flex-col items-center text-center gap-4">
+          <div className="rounded-xl border border-border bg-card p-8 flex flex-col items-center text-center gap-5">
             <CheckCircle2 className="w-12 h-12 text-[#34D399]" />
             <div>
               <h2 className="text-lg font-semibold">Import complete</h2>
@@ -341,11 +382,38 @@ export default function UploadPage() {
                 )}
               </p>
             </div>
+
+            {catResult && (
+              <div className="w-full max-w-xs grid grid-cols-2 gap-2 text-sm">
+                {catResult.transfers > 0 && (
+                  <div className="rounded-lg bg-muted/50 px-3 py-2 text-center">
+                    <p className="font-mono font-semibold">{catResult.transfers}</p>
+                    <p className="text-xs text-muted-foreground">transfers detected</p>
+                  </div>
+                )}
+                <div className="rounded-lg bg-muted/50 px-3 py-2 text-center">
+                  <p className="font-mono font-semibold">{catResult.ruleMatched}</p>
+                  <p className="text-xs text-muted-foreground">matched by rules</p>
+                </div>
+                <div className="rounded-lg bg-muted/50 px-3 py-2 text-center">
+                  <p className="font-mono font-semibold">{catResult.aiCategorised}</p>
+                  <p className="text-xs text-muted-foreground">AI categorised</p>
+                </div>
+                {catResult.needsReview > 0 && (
+                  <div className="rounded-lg bg-warning/10 border border-warning/20 px-3 py-2 text-center">
+                    <p className="font-mono font-semibold text-warning">{catResult.needsReview}</p>
+                    <p className="text-xs text-muted-foreground">need review</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-3">
-              <Button variant="outline" onClick={reset}>
-                Import another file
-              </Button>
-              <LinkButton href="/transactions">View transactions</LinkButton>
+              <Button variant="outline" onClick={reset}>Import another file</Button>
+              {catResult && catResult.needsReview > 0
+                ? <LinkButton href="/review">Review transactions</LinkButton>
+                : <LinkButton href="/transactions">View transactions</LinkButton>
+              }
             </div>
           </div>
         )}
