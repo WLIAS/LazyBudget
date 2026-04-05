@@ -162,7 +162,15 @@ export function Header() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground px-1">To</p>
+                  <div className="flex items-center justify-between px-1">
+                    <p className="text-xs text-muted-foreground">To</p>
+                    <button
+                      onClick={() => setCustomTo(toISO(new Date()))}
+                      className="text-[10px] text-primary hover:underline leading-none"
+                    >
+                      Today
+                    </button>
+                  </div>
                   <input
                     type="date"
                     value={customTo}
