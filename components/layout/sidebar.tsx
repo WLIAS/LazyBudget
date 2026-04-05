@@ -11,6 +11,7 @@ import {
   PiggyBank,
   Wallet,
   TrendingUp,
+  Settings,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store/app-store';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { href: '/budget',       label: 'Budget',       icon: PiggyBank },
   { href: '/accounts',     label: 'Accounts',     icon: Wallet },
   { href: '/savings',      label: 'Savings',      icon: TrendingUp },
+  { href: '/settings',    label: 'Settings',     icon: Settings },
 ];
 
 export function Sidebar() {

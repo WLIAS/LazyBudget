@@ -8,12 +8,20 @@ import { TransactionTable } from '@/components/transactions/transaction-table';
 import { LinkButton } from '@/components/ui/link-button';
 import { Input } from '@/components/ui/input';
 import { getDB } from '@/lib/db/index';
+import { useAppStore } from '@/lib/store/app-store';
 
 export default function TransactionsPage() {
   const [search, setSearch] = useState('');
+  const { dateRange } = useAppStore();
 
-  const transactions = useLiveQuery(() =>
-    getDB().transactions.orderBy('date').reverse().toArray()
+  const transactions = useLiveQuery(
+    () =>
+      getDB()
+        .transactions.orderBy('date')
+        .reverse()
+        .filter((t) => t.date >= dateRange.from && t.date <= dateRange.to)
+        .toArray(),
+    [dateRange.from, dateRange.to]
   );
   const accounts = useLiveQuery(() => getDB().accounts.toArray());
   const categories = useLiveQuery(() => getDB().categories.toArray());
