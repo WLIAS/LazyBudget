@@ -1,0 +1,22 @@
+# Next.js
+.next/
+out/
+build/
+
+# Dependencies
+node_modules/
+
+# Misc
+.DS_Store
+*.pem
+tsconfig.tsbuildinfo
+
+# Local env
+.env.local
+.env*.local
+
+# Vercel
+.vercel
+
+# Claude
+.claude/settings.local.json

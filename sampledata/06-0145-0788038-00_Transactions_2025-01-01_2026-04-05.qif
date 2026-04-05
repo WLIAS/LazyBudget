@@ -1,0 +1,928 @@
+!Type:Bank
+^
+D01/04/2026
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D30/03/2026
+T-850.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D27/03/2026
+T-869.71
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D27/03/2026
+T-707.75
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D27/03/2026
+T-176.34
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D23/03/2026
+T-1610.36
+LDirect Debit
+PVero Insuranc
+MPart=Anz F&G Insu Code=Ib32621 Ref=000006915232
+^
+D18/03/2026
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D16/03/2026
+T-4000.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D16/03/2026
+T2000.00
+LDirect Credit
+PMr J Chen
+MPart=Insurance 
+^
+D13/03/2026
+T-869.71
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D13/03/2026
+T-707.75
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D13/03/2026
+T-176.34
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D04/03/2026
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D27/02/2026
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D27/02/2026
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D27/02/2026
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D27/02/2026
+T3500.00
+LDirect Credit
+PNew Business Acqu
+MPart=Campaign Code=Cashback 
+^
+D24/02/2026
+T-2263.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D18/02/2026
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D17/02/2026
+T90.00
+LBill Payment
+PJ D Chadwick
+^
+D13/02/2026
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D13/02/2026
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D13/02/2026
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D04/02/2026
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D30/01/2026
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D30/01/2026
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D30/01/2026
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D21/01/2026
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D16/01/2026
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D16/01/2026
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D16/01/2026
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D07/01/2026
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D05/01/2026
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D05/01/2026
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D05/01/2026
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D24/12/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D19/12/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D19/12/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D19/12/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D10/12/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D05/12/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D05/12/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D05/12/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D26/11/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D21/11/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D21/11/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D21/11/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D19/11/2025
+T-303.50
+LPayment
+PJ H
+MPart=J H 
+^
+D12/11/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D10/11/2025
+T-654.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D07/11/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D07/11/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D07/11/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D29/10/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D24/10/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D24/10/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D24/10/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D15/10/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D14/10/2025
+T-1259.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D10/10/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D10/10/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D10/10/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D01/10/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D26/09/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D26/09/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D26/09/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D17/09/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D12/09/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D12/09/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D12/09/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D03/09/2025
+T-300.00
+LPayment
+PWise
+^
+D03/09/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D29/08/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D29/08/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D29/08/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D20/08/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D18/08/2025
+T-1226.70
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D15/08/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D15/08/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D15/08/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D13/08/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D13/08/2025
+T100.00
+LPayment
+PNeef,Katja Ph
+MPart=Tickets 
+^
+D11/08/2025
+T-230.00
+LPayment
+PThao Hoang
+^
+D01/08/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D01/08/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D01/08/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D30/07/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D18/07/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D18/07/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D18/07/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D16/07/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D04/07/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D04/07/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D04/07/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D04/07/2025
+T-30.00
+LPayment
+PY Zhang
+^
+D02/07/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D23/06/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D23/06/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D23/06/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D18/06/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D09/06/2025
+T-328.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D06/06/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D06/06/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D06/06/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D04/06/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D28/05/2025
+T-981.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D23/05/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D23/05/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D23/05/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D21/05/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D09/05/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D09/05/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D09/05/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D07/05/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D28/04/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D28/04/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D28/04/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D23/04/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D22/04/2025
+T-654.62
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D11/04/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D11/04/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D11/04/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D09/04/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D28/03/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D28/03/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D28/03/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D26/03/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D21/03/2025
+T-1545.46
+LDirect Debit
+PVero Insuranc
+MPart=Anz F&G Insu Code=Ib30965 Ref=000006915232
+^
+D21/03/2025
+T-399.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D20/03/2025
+T1545.00
+LDirect Credit
+PMr J Chen
+MPart=Mortgage 
+^
+D14/03/2025
+T-930.93
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D14/03/2025
+T-741.92
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D14/03/2025
+T-184.85
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D12/03/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D28/02/2025
+T-1080.79
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D28/02/2025
+T-861.37
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D28/02/2025
+T-214.61
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D26/02/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D14/02/2025
+T-1106.96
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D14/02/2025
+T-882.22
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D14/02/2025
+T-174.13
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D12/02/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D31/01/2025
+T-1106.96
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D31/01/2025
+T-882.22
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D31/01/2025
+T-174.13
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D29/01/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D20/01/2025
+T-500.00
+LPayment
+PJack Chen
+MPart=Jack Asb 
+^
+D17/01/2025
+T-1106.96
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D17/01/2025
+T-882.22
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D17/01/2025
+T-174.13
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D15/01/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
+D03/01/2025
+T-1106.96
+LLoan Payment
+PTo: 88787882-1001
+MRef=      004600
+^
+D03/01/2025
+T-882.22
+LLoan Payment
+PTo: 88787882-1002
+MRef=      004600
+^
+D03/01/2025
+T-174.13
+LLoan Payment
+PTo: 88787882-1003
+MRef=      004600
+^
+D03/01/2025
+T2185.00
+LDeposit
+PJ Chen
+MPart=Mortgage 
+^
