@@ -56,7 +56,11 @@ export default function DashboardPage() {
   const isEmpty = transactions !== undefined && transactions.length === 0;
 
   return (
-    <PageShell title="Dashboard" description="Your financial overview">
+    <PageShell
+      title="Dashboard"
+      description="Your financial overview"
+      badge="v0.3.0"
+    >
       <div className="space-y-6">
         {isEmpty ? (
           /* ── Empty state ── */
