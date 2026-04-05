@@ -21,7 +21,8 @@ function thisMonthRange(): DateRange {
 interface AppState {
   // Global date range filter
   dateRange: DateRange;
-  setDateRange: (range: DateRange) => void;
+  dateRangeLabel: string;
+  setDateRange: (range: DateRange, label?: string) => void;
 
   // Currently selected account (null = all)
   selectedAccountId: string | null;
@@ -38,7 +39,8 @@ interface AppState {
 
 export const useAppStore = create<AppState>()((set) => ({
   dateRange: thisMonthRange(),
-  setDateRange: (range) => set({ dateRange: range }),
+  dateRangeLabel: 'This month',
+  setDateRange: (range, label) => set({ dateRange: range, dateRangeLabel: label ?? `${range.from} → ${range.to}` }),
 
   selectedAccountId: null,
   setSelectedAccountId: (id) => set({ selectedAccountId: id }),
