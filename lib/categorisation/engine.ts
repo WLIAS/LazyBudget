@@ -126,7 +126,7 @@ export async function runCategorisation(
         const validCat = categories.find((c) => c.id === r.categoryId);
         if (!validCat) continue;
 
-        if (r.confidence >= 0.85) {
+        if (r.confidence >= 0.75) {
           await updateTransaction(tx.id, {
             categoryId: r.categoryId,
             categorySource: 'ai',
