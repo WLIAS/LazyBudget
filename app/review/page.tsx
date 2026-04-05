@@ -1,17 +1,18 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { CheckCircle2, Upload, X } from 'lucide-react';
 import { PageShell } from '@/components/layout/page-shell';
 import { LinkButton } from '@/components/ui/link-button';
+import { CategoryPicker } from '@/components/ui/category-picker';
 import { getDB } from '@/lib/db/index';
-import { updateTransaction, getTransactions } from '@/lib/db/transactions';
+import { updateTransaction } from '@/lib/db/transactions';
 import { createRule } from '@/lib/db/rules';
 import { formatMoney } from '@/lib/utils/money';
 import { formatDateShort } from '@/lib/utils/dates';
 import { cn } from '@/lib/utils';
-import type { Transaction, Category } from '@/lib/db/schema';
+import type { Transaction } from '@/lib/db/schema';
 
 interface Notification {
   id: string;
@@ -20,7 +21,9 @@ interface Notification {
 
 export default function ReviewPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [pending, setPending] = useState<Set<string>>(new Set());
+  // Use a ref for in-flight IDs to avoid stale closure issues
+  const pendingRef = useRef<Set<string>>(new Set());
+  const [, forceUpdate] = useState(0);
 
   const transactions = useLiveQuery(() =>
     getDB().transactions
@@ -32,56 +35,55 @@ export default function ReviewPage() {
 
   const categories = useLiveQuery(() => getDB().categories.toArray());
 
-  // Group categories by group for <optgroup> rendering
-  const categoryGroups = useMemo(() => {
+  // Deduplicate by name in case DB has legacy UUID + stable-ID records
+  const deduped = useMemo(() => {
     if (!categories) return [];
-    const map = new Map<string, Category[]>();
-    for (const cat of categories) {
-      if (cat.name === 'Internal Transfer' || cat.name === 'Uncategorised') continue;
-      if (!map.has(cat.group)) map.set(cat.group, []);
-      map.get(cat.group)!.push(cat);
-    }
-    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
+    const seen = new Set<string>();
+    return categories.filter((c) => {
+      const key = c.name.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }, [categories]);
 
-  const pushNotification = useCallback((message: string) => {
+  function pushNotification(message: string) {
     const id = Math.random().toString(36).slice(2);
     setNotifications((prev) => [...prev, { id, message }]);
-    setTimeout(() => {
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-    }, 4000);
-  }, []);
+    setTimeout(() => setNotifications((prev) => prev.filter((n) => n.id !== id)), 4000);
+  }
 
-  const handleCategorise = useCallback(async (tx: Transaction, categoryId: string) => {
-    if (!categoryId || pending.has(tx.id)) return;
-
-    setPending((p) => new Set(p).add(tx.id));
+  async function handleCategorise(tx: Transaction, categoryId: string) {
+    if (!categoryId || pendingRef.current.has(tx.id)) return;
+    pendingRef.current.add(tx.id);
+    forceUpdate((n) => n + 1);
 
     try {
-      // 1. Apply to this transaction
+      // 1. Categorise this transaction
       await updateTransaction(tx.id, {
         categoryId,
         categorySource: 'user',
         confidence: 1.0,
       });
 
-      // 2. Create exact-match rule for this payee (deduped inside createRule)
+      // 2. Create / upsert exact-match rule for this payee
       await createRule({
         type: 'exact',
         matchField: 'payee',
-        matchValue: tx.payee,
+        matchValue: tx.payee || tx.rawPayee,
         categoryId,
         priority: 100,
         createdBy: 'user',
       });
 
-      // 3. Apply to all other transactions with the same payee
-      const all = await getTransactions();
+      // 3. Apply to ALL other transactions with the same payee (any category state)
+      const payeeKey = (tx.payee || tx.rawPayee).toLowerCase();
+      const all = await getDB().transactions.toArray();
       const samePayee = all.filter(
         (t) =>
           t.id !== tx.id &&
-          t.payee.toLowerCase() === tx.payee.toLowerCase() &&
-          !t.isTransfer
+          !t.isTransfer &&
+          (t.payee || t.rawPayee).toLowerCase() === payeeKey
       );
 
       if (samePayee.length > 0) {
@@ -98,16 +100,15 @@ export default function ReviewPage() {
 
       const total = 1 + samePayee.length;
       pushNotification(
-        `"${tx.payee}" → category applied to ${total} transaction${total !== 1 ? 's' : ''}`
+        `"${tx.payee || tx.rawPayee}" applied to ${total} transaction${total !== 1 ? 's' : ''}`
       );
+    } catch (e) {
+      console.error('[review] categorise failed:', e);
     } finally {
-      setPending((p) => {
-        const next = new Set(p);
-        next.delete(tx.id);
-        return next;
-      });
+      pendingRef.current.delete(tx.id);
+      forceUpdate((n) => n + 1);
     }
-  }, [pending, pushNotification]);
+  }
 
   const isEmpty = transactions !== undefined && transactions.length === 0;
   const hasData = transactions !== undefined && transactions.length > 0;
@@ -154,50 +155,45 @@ export default function ReviewPage() {
       ) : hasData ? (
         <div className="max-w-2xl">
           <div className="rounded-lg border border-border overflow-hidden">
-            {transactions.map((tx, i) => (
-              <div
-                key={tx.id}
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3 transition-colors',
-                  pending.has(tx.id) ? 'opacity-50' : 'hover:bg-muted/20',
-                  i < transactions.length - 1 && 'border-b border-border/50'
-                )}
-              >
-                {/* Payee + date */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{tx.payee || tx.rawPayee}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDateShort(tx.date)}
-                    {tx.description ? ` · ${tx.description}` : ''}
-                  </p>
-                </div>
-
-                {/* Category picker */}
-                <select
-                  defaultValue=""
-                  disabled={pending.has(tx.id)}
-                  onChange={(e) => handleCategorise(tx, e.target.value)}
-                  className="text-xs bg-input border border-border rounded-lg px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-ring max-w-[160px] disabled:opacity-50"
+            {transactions.map((tx, i) => {
+              const isPending = pendingRef.current.has(tx.id);
+              return (
+                <div
+                  key={tx.id}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 transition-colors',
+                    isPending ? 'opacity-40' : 'hover:bg-muted/20',
+                    i < transactions.length - 1 && 'border-b border-border/50'
+                  )}
                 >
-                  <option value="" disabled>Pick category…</option>
-                  {categoryGroups.map(([group, cats]) => (
-                    <optgroup key={group} label={group}>
-                      {cats.map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+                  {/* Payee + date */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{tx.payee || tx.rawPayee}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDateShort(tx.date)}
+                      {tx.description ? ` · ${tx.description}` : ''}
+                    </p>
+                  </div>
 
-                {/* Amount */}
-                <span className={cn(
-                  'font-mono text-sm font-medium whitespace-nowrap',
-                  tx.amount >= 0 ? 'amount-positive' : 'amount-negative'
-                )}>
-                  {formatMoney(tx.amount)}
-                </span>
-              </div>
-            ))}
+                  {/* Category picker */}
+                  <CategoryPicker
+                    categories={deduped}
+                    value={null}
+                    onChange={(catId) => handleCategorise(tx, catId)}
+                    disabled={isPending}
+                    className="w-44 shrink-0"
+                  />
+
+                  {/* Amount */}
+                  <span className={cn(
+                    'font-mono text-sm font-medium whitespace-nowrap',
+                    tx.amount >= 0 ? 'amount-positive' : 'amount-negative'
+                  )}>
+                    {formatMoney(tx.amount)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : (
