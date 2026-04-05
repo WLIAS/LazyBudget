@@ -1,23 +1,31 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Search, Upload } from 'lucide-react';
+import { Search, Upload, Sparkles, X } from 'lucide-react';
 import { PageShell } from '@/components/layout/page-shell';
 import { TransactionTable } from '@/components/transactions/transaction-table';
 import { LinkButton } from '@/components/ui/link-button';
 import { Input } from '@/components/ui/input';
 import { getDB } from '@/lib/db/index';
 import { useAppStore } from '@/lib/store/app-store';
+import { reclassifyUncategorised, type EngineProgress, type EngineResult } from '@/lib/categorisation/engine';
 import { cn } from '@/lib/utils';
 
 type TypeFilter = 'all' | 'debit' | 'credit';
+type ReclassifyState = 'idle' | 'running';
 
 export default function TransactionsPage() {
   const [search, setSearch]           = useState('');
   const [categoryId, setCategoryId]   = useState('');
   const [typeFilter, setTypeFilter]   = useState<TypeFilter>('all');
+  const [reclassifyState, setReclassifyState] = useState<ReclassifyState>('idle');
+  const [reclassifyProgress, setReclassifyProgress] = useState<EngineProgress | null>(null);
+  const [reclassifyResult, setReclassifyResult] = useState<EngineResult | null>(null);
   const { dateRange } = useAppStore();
+
+  // Prevent double-click triggering concurrent runs
+  const runningRef = useRef(false);
 
   const transactions = useLiveQuery(
     () =>
@@ -30,6 +38,11 @@ export default function TransactionsPage() {
   );
   const accounts   = useLiveQuery(() => getDB().accounts.toArray());
   const categories = useLiveQuery(() => getDB().categories.toArray());
+
+  // Count of ALL uncategorised non-transfer transactions (not date-range-filtered)
+  const uncategorisedCount = useLiveQuery(
+    () => getDB().transactions.filter((t) => !t.isTransfer && !t.categoryId).count()
+  );
 
   // Deduplicate categories by name (safety net for legacy data)
   const deduped = useMemo(() => {
@@ -70,6 +83,25 @@ export default function TransactionsPage() {
   const isEmpty   = !isLoading && transactions.length === 0;
   const isFiltered = !!search.trim() || !!categoryId || typeFilter !== 'all';
 
+  async function handleReclassify() {
+    if (runningRef.current) return;
+    runningRef.current = true;
+    setReclassifyState('running');
+    setReclassifyResult(null);
+    setReclassifyProgress(null);
+    try {
+      const result = await reclassifyUncategorised((p) => setReclassifyProgress(p));
+      setReclassifyResult(result);
+    } finally {
+      runningRef.current = false;
+      setReclassifyState('idle');
+      setReclassifyProgress(null);
+    }
+  }
+
+  const isRunning = reclassifyState === 'running';
+  const hasUncategorised = (uncategorisedCount ?? 0) > 0;
+
   return (
     <PageShell
       title="Transactions"
@@ -93,6 +125,30 @@ export default function TransactionsPage() {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Reclassify result banner */}
+          {reclassifyResult && (
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-accent/50 px-4 py-2.5 text-sm">
+              <Sparkles className="w-4 h-4 shrink-0 text-primary" />
+              <span className="flex-1">
+                Done —{' '}
+                {reclassifyResult.aiCategorised + reclassifyResult.ruleMatched > 0
+                  ? `categorised ${(reclassifyResult.aiCategorised + reclassifyResult.ruleMatched).toLocaleString()} transaction${reclassifyResult.aiCategorised + reclassifyResult.ruleMatched === 1 ? '' : 's'}`
+                  : 'no new categories assigned'}
+                {reclassifyResult.needsReview > 0 &&
+                  `, ${reclassifyResult.needsReview.toLocaleString()} still need review`}
+                {reclassifyResult.errors > 0 &&
+                  `, ${reclassifyResult.errors} batch error${reclassifyResult.errors === 1 ? '' : 's'}`}
+              </span>
+              <button
+                onClick={() => setReclassifyResult(null)}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* Filters row */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Search */}
@@ -136,6 +192,27 @@ export default function TransactionsPage() {
                 </button>
               ))}
             </div>
+
+            {/* Re-run AI on uncategorised */}
+            {(hasUncategorised || isRunning) && (
+              <button
+                onClick={handleReclassify}
+                disabled={isRunning}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors',
+                  isRunning
+                    ? 'border-border text-muted-foreground cursor-not-allowed'
+                    : 'border-primary/40 text-primary hover:bg-primary/10'
+                )}
+              >
+                <Sparkles className={cn('w-3.5 h-3.5', isRunning && 'animate-pulse')} />
+                {isRunning
+                  ? reclassifyProgress
+                    ? `Running… ${reclassifyProgress.done}/${reclassifyProgress.total}`
+                    : 'Running…'
+                  : `Re-run AI${uncategorisedCount ? ` (${uncategorisedCount.toLocaleString()} uncategorised)` : ''}`}
+              </button>
+            )}
           </div>
 
           {/* Table */}

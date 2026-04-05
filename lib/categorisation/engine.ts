@@ -159,6 +159,101 @@ export async function runCategorisation(
 }
 
 /**
+ * Run the categorisation pipeline on all currently uncategorised (non-transfer)
+ * transactions. Unlike runCategorisation, this is not scoped to an import batch
+ * and is suitable for triggering from the UI on demand.
+ */
+export async function reclassifyUncategorised(
+  onProgress?: (p: EngineProgress) => void
+): Promise<EngineResult> {
+  const [rules, categories, allTxs] = await Promise.all([
+    getRules(),
+    getCategories(),
+    getTransactions({ isTransfer: false }),
+  ]);
+
+  const txs = allTxs.filter((t) => !t.categoryId);
+  const total = txs.length;
+  let done = 0;
+
+  const result: EngineResult = {
+    ruleMatched: 0,
+    aiCategorised: 0,
+    needsReview: 0,
+    transfers: 0,
+    errors: 0,
+  };
+
+  if (total === 0) return result;
+
+  onProgress?.({ phase: 'rules', done: 0, total });
+
+  // ── Phase 1: Rule matching ─────────────────────────────────────────────────
+  const needsAI: Transaction[] = [];
+
+  for (const tx of txs) {
+    const match = matchRules(tx, rules);
+    if (match) {
+      await updateTransaction(tx.id, {
+        categoryId: match.categoryId,
+        categorySource: 'rule',
+        confidence: 1.0,
+      });
+      await incrementRuleHitCount(match.ruleId);
+      result.ruleMatched++;
+    } else {
+      needsAI.push(tx);
+    }
+    done++;
+    onProgress?.({ phase: 'rules', done, total });
+  }
+
+  // ── Phase 2: AI categorisation in batches ─────────────────────────────────
+  onProgress?.({ phase: 'ai', done, total });
+
+  for (let i = 0; i < needsAI.length; i += BATCH_SIZE) {
+    const batch = needsAI.slice(i, i + BATCH_SIZE);
+
+    try {
+      const aiResults = await categoriseWithAI(batch, categories);
+
+      for (const r of aiResults) {
+        const tx = batch[r.index];
+        if (!tx) continue;
+        const validCat = categories.find((c) => c.id === r.categoryId);
+        if (!validCat) continue;
+
+        if (r.confidence >= 0.75) {
+          await updateTransaction(tx.id, {
+            categoryId: r.categoryId,
+            categorySource: 'ai',
+            confidence: r.confidence,
+          });
+          result.aiCategorised++;
+        } else {
+          result.needsReview++;
+        }
+      }
+
+      const returnedIndexes = new Set(aiResults.map((r) => r.index));
+      for (let j = 0; j < batch.length; j++) {
+        if (!returnedIndexes.has(j)) result.needsReview++;
+      }
+    } catch (e) {
+      console.error('[engine] AI reclassify batch failed:', e);
+      result.errors++;
+      result.needsReview += batch.length;
+    }
+
+    done += batch.length;
+    onProgress?.({ phase: 'ai', done, total });
+  }
+
+  onProgress?.({ phase: 'done', done: total, total });
+  return result;
+}
+
+/**
  * Reprocess all transactions matching a specific payee with a new rule.
  * Called from the review queue when a user creates a rule.
  */

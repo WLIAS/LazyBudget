@@ -19,11 +19,11 @@ genesis energy,Essentials,Utilities
 contact energy,Essentials,Utilities
 trustpower,Essentials,Utilities
 powershop,Essentials,Utilities
-spark,Essentials,InternetPhone
-vodafone,Essentials,InternetPhone
-one nz,Essentials,InternetPhone
-2degrees,Essentials,InternetPhone
-skinny,Essentials,InternetPhone
+spark,Essentials,Internet/Phone
+vodafone,Essentials,Internet/Phone
+one nz,Essentials,Internet/Phone
+2degrees,Essentials,Internet/Phone
+skinny,Essentials,Internet/Phone
 bp,Transport,Fuel
 z energy,Transport,Fuel
 caltex,Transport,Fuel
@@ -38,13 +38,13 @@ care park,Transport,Parking
 vtnz,Transport,Vehicle Maintenance
 aa auto,Transport,Vehicle Maintenance
 tonys tyre,Transport,Vehicle Maintenance
-mcdonalds,Lifestyle,TakeawayCoffee
-kfc,Lifestyle,TakeawayCoffee
-burger king,Lifestyle,TakeawayCoffee
-subway,Lifestyle,TakeawayCoffee
-dominos,Lifestyle,TakeawayCoffee
-starbucks,Lifestyle,TakeawayCoffee
-coffee club,Lifestyle,TakeawayCoffee
+mcdonalds,Lifestyle,Takeaway/Coffee
+kfc,Lifestyle,Takeaway/Coffee
+burger king,Lifestyle,Takeaway/Coffee
+subway,Lifestyle,Takeaway/Coffee
+dominos,Lifestyle,Takeaway/Coffee
+starbucks,Lifestyle,Takeaway/Coffee
+coffee club,Lifestyle,Takeaway/Coffee
 event cinemas,Lifestyle,Entertainment
 hoyts,Lifestyle,Entertainment
 skycity,Lifestyle,Entertainment
@@ -72,5 +72,19 @@ briscoes,Shopping,Home & Garden
 kindercare,Children,Childcare
 beststart,Children,Childcare
 ird,Financial,Tax
+ird refund,Income,Refunds
+ird credit,Income,Refunds
+salary,Income,Salary
+wages,Income,Salary
+payroll,Income,Salary
+account fee,Financial,Fees & Charges
+monthly fee,Financial,Fees & Charges
+service fee,Financial,Fees & Charges
+bank charge,Financial,Fees & Charges
 transfer,Transfers,Internal Transfer
 online transfer,Transfers,Internal Transfer
+tfr,Transfers,Internal Transfer
+trf,Transfers,Internal Transfer
+to savings,Transfers,Internal Transfer
+own account,Transfers,Internal Transfer
+internet banking,Transfers,Internal Transfer

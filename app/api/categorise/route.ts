@@ -59,13 +59,7 @@ Rules:
 - Match keywords case-insensitively and as substrings (e.g. "AT HOP" matches "AT HOP TOP-UP")
 
 NZ merchant → category mapping (Category › Subcategory: keywords):
-${buildMerchantHints()}
-
-Additional hints:
-- Salary/wages/pay credits with employer name → Income › Salary
-- IRD refund/credit → Income › Refunds
-- ANZ/ASB/BNZ/Westpac/Kiwibank monthly/account fees → Financial › Fees & Charges
-- TFR, online transfer, to savings, own account → Transfers › Internal Transfer`;
+${buildMerchantHints()}`;
 
 
     const userPrompt = `Available categories:\n${categoryList}\n\nCategorise these transactions:\n${txList}`;
