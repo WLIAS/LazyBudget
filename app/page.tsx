@@ -59,7 +59,7 @@ export default function DashboardPage() {
     <PageShell
       title="Dashboard"
       description="Your financial overview"
-      badge="v0.3.0"
+      badge="v0.3.2"
     >
       <div className="space-y-6">
         {isEmpty ? (
