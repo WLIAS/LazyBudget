@@ -55,8 +55,10 @@ export function Header() {
   const y = new Date().getFullYear();
 
   const presets = [
-    { label: 'This month', from: monthStart(0),   to: monthEnd(0) },
-    { label: 'Last month', from: monthStart(-1),  to: monthEnd(-1) },
+    { label: 'All time',   from: '2000-01-01',     to: toISO(new Date()) },
+    { label: 'This year',  from: `${y}-01-01`,     to: `${y}-12-31` },
+    { label: 'This month', from: monthStart(0),    to: monthEnd(0) },
+    { label: 'Last month', from: monthStart(-1),   to: monthEnd(-1) },
     { label: 'Last year',  from: `${y - 1}-01-01`, to: `${y - 1}-12-31` },
   ];
 
