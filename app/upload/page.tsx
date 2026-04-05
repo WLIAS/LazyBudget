@@ -18,6 +18,7 @@ import { getAccounts, createAccount } from '@/lib/db/accounts';
 import { getDB } from '@/lib/db/index';
 import { seedDefaultCategories } from '@/lib/db/categories';
 import type { Transaction, Account } from '@/lib/db/schema';
+import type { BankProfile } from '@/lib/parsers/bank-profiles';
 
 type Step = 'drop' | 'map' | 'account' | 'preview' | 'importing' | 'done';
 
@@ -27,12 +28,6 @@ interface NewAccountData {
   bankName: string;
 }
 
-const STEP_LABELS: Partial<Record<Step, string>> = {
-  drop:    'Upload file',
-  map:     'Map columns',
-  account: 'Select account',
-  preview: 'Preview & import',
-};
 
 export default function UploadPage() {
   const [step, setStep] = useState<Step>('drop');
@@ -44,6 +39,8 @@ export default function UploadPage() {
     payee: string | null;
     description: string | null;
   }>({ date: null, amount: null, payee: null, description: null });
+  const [bankProfile, setBankProfile] = useState<BankProfile | null>(null);
+  const [isQIF, setIsQIF] = useState(false);
   const [parsedTxs, setParsedTxs] = useState<Omit<Transaction, 'id' | 'createdAt'>[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
@@ -67,16 +64,17 @@ export default function UploadPage() {
       const accs = await getAccounts();
       setAccounts(accs);
 
-      const batchId = uuidv4();
-      const isQIF = f.name.toLowerCase().endsWith('.qif');
+      const qif = f.name.toLowerCase().endsWith('.qif');
+      setIsQIF(qif);
 
-      if (isQIF) {
+      if (qif) {
         const entries = await parseQIFFile(f);
         console.log('[LazyBudget] QIF parsed:', entries.length, 'entries from', f.name);
         if (entries.length === 0) {
           setError('No transactions found in this QIF file. Check that it contains bank transactions (D/T/P/M fields).');
           return;
         }
+        const batchId = uuidv4();
         const txs = normaliseQIFEntries(entries, '__pending__', batchId);
         setParsedTxs(txs);
         setStep('account');
@@ -84,15 +82,10 @@ export default function UploadPage() {
         const result = await parseCSV(f);
         setHeaders(result.headers);
         setMapping(result.mapping);
+        setBankProfile(result.bankProfile);
         console.log('[LazyBudget] CSV parsed:', result.rows.length, 'rows, bank:', result.bankProfile?.name ?? 'generic');
-
-        if (result.isMappingGeneric && (!result.mapping.date || !result.mapping.amount)) {
-          setStep('map');
-        } else {
-          const txs = normaliseCSVRows(result.rows, '__pending__', batchId, result.bankProfile);
-          setParsedTxs(txs);
-          setStep('account');
-        }
+        // Always show column mapper so user can review/adjust detected columns
+        setStep('map');
       }
     } catch (e) {
       console.error('[LazyBudget] File parse error:', e);
@@ -110,13 +103,13 @@ export default function UploadPage() {
         payee: mapping.payee ?? '',
         description: mapping.description ?? '',
       });
-      const txs = normaliseCSVRows(result.rows, '__pending__', batchId);
+      const txs = normaliseCSVRows(result.rows, '__pending__', batchId, bankProfile ?? undefined);
       setParsedTxs(txs);
       setStep('account');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Column mapping failed');
     }
-  }, [file, mapping]);
+  }, [file, mapping, bankProfile]);
 
   const handleAccountContinue = useCallback(() => {
     if (!selectedAccountId && !newAccountData?.name) {
@@ -182,6 +175,8 @@ export default function UploadPage() {
     setFile(null);
     setHeaders([]);
     setMapping({ date: null, amount: null, payee: null, description: null });
+    setBankProfile(null);
+    setIsQIF(false);
     setParsedTxs([]);
     setSelectedAccountId(null);
     setNewAccountData(null);
@@ -198,12 +193,22 @@ export default function UploadPage() {
 
         {/* Step breadcrumb */}
         {step !== 'done' && step !== 'importing' && (
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            {(['drop', 'account', 'preview'] as const).map((s, i) => {
-              const label = s === 'drop' ? 'Upload file' : s === 'account' ? 'Select account' : 'Preview & import';
-              const isActive = step === s || (s === 'drop' && step === 'map');
-              const isDone = (s === 'drop' && ['account','preview'].includes(step)) ||
-                             (s === 'account' && step === 'preview');
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
+            {(isQIF
+              ? (['drop', 'account', 'preview'] as const)
+              : (['drop', 'map', 'account', 'preview'] as const)
+            ).map((s, i) => {
+              const labels: Record<string, string> = {
+                drop: 'Upload file', map: 'Map columns',
+                account: 'Select account', preview: 'Preview & import',
+              };
+              const order = isQIF
+                ? ['drop', 'account', 'preview']
+                : ['drop', 'map', 'account', 'preview'];
+              const currentIdx = order.indexOf(step);
+              const thisIdx = order.indexOf(s);
+              const isActive = step === s;
+              const isDone = thisIdx < currentIdx;
               return (
                 <span key={s} className="flex items-center gap-1.5">
                   {i > 0 && <ChevronRight className="w-3 h-3 opacity-40" />}
@@ -211,7 +216,7 @@ export default function UploadPage() {
                     isActive ? 'text-foreground font-medium' :
                     isDone ? 'line-through opacity-40' : 'opacity-40'
                   }>
-                    {label}
+                    {labels[s]}
                   </span>
                 </span>
               );
@@ -230,20 +235,35 @@ export default function UploadPage() {
         {/* STEP: Drop */}
         {step === 'drop' && <Dropzone onFile={handleFile} />}
 
-        {/* STEP: Column mapping (CSV only, when auto-detect fails) */}
+        {/* STEP: Column mapping (CSV only) */}
         {step === 'map' && (
           <div className="space-y-4">
+            {file && (
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
+                <FileText className="w-5 h-5 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{file.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {bankProfile ? `Detected: ${bankProfile.name}` : 'Confirm the column mapping below'}
+                  </p>
+                </div>
+                {bankProfile && <span className="text-xs text-[#34D399] font-medium">Auto-detected ✓</span>}
+              </div>
+            )}
             <ColumnMapper
               headers={headers}
               mapping={mapping}
               onChange={(field, value) => setMapping((m) => ({ ...m, [field]: value }))}
             />
-            <Button
-              onClick={handleMappingConfirm}
-              disabled={!mapping.date || !mapping.amount}
-            >
-              Continue
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => setStep('drop')}>Back</Button>
+              <Button
+                onClick={handleMappingConfirm}
+                disabled={!mapping.date || !mapping.amount}
+              >
+                Continue
+              </Button>
+            </div>
           </div>
         )}
 
@@ -269,9 +289,12 @@ export default function UploadPage() {
               onSelect={(id) => { setSelectedAccountId(id); setNewAccountData(null); }}
               onCreate={(data) => { setNewAccountData(data); setSelectedAccountId(null); }}
             />
-            <Button onClick={handleAccountContinue}>
-              Preview {parsedTxs.length.toLocaleString()} transactions
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => setStep(isQIF ? 'drop' : 'map')}>Back</Button>
+              <Button onClick={handleAccountContinue}>
+                Preview {parsedTxs.length.toLocaleString()} transactions
+              </Button>
+            </div>
           </div>
         )}
 
