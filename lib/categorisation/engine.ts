@@ -102,11 +102,12 @@ export async function runCategorisation(
       });
       await incrementRuleHitCount(match.ruleId);
       result.ruleMatched++;
+      done++;
+      onProgress?.({ phase: 'rules', done, total });
     } else {
       needsAI.push(tx);
+      // don't count here — Phase 3 will increment done as batches complete
     }
-    done++;
-    onProgress?.({ phase: 'rules', done, total });
   }
 
   // ── Phase 3: AI categorisation in batches of 50 ───────────────────────────
@@ -201,11 +202,11 @@ export async function reclassifyUncategorised(
       });
       await incrementRuleHitCount(match.ruleId);
       result.ruleMatched++;
+      done++;
+      onProgress?.({ phase: 'rules', done, total });
     } else {
       needsAI.push(tx);
     }
-    done++;
-    onProgress?.({ phase: 'rules', done, total });
   }
 
   // ── Phase 2: AI categorisation in batches ─────────────────────────────────
