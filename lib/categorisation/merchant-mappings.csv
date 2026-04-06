@@ -95,3 +95,46 @@ trf,Transfers,Internal Transfer
 to savings,Transfers,Internal Transfer
 own account,Transfers,Internal Transfer
 internet banking,Transfers,Internal Transfer
+# Generic food & dining — catches unlisted restaurants by keyword
+# (longer specific entries above always win due to length-sorted matching)
+pizza,Lifestyle,Dining Out
+sushi,Lifestyle,Dining Out
+burger,Lifestyle,Dining Out
+noodle,Lifestyle,Dining Out
+ramen,Lifestyle,Dining Out
+kebab,Lifestyle,Dining Out
+dumpling,Lifestyle,Dining Out
+taco,Lifestyle,Dining Out
+thai,Lifestyle,Dining Out
+indian,Lifestyle,Dining Out
+chinese,Lifestyle,Dining Out
+korean,Lifestyle,Dining Out
+japanese,Lifestyle,Dining Out
+restaurant,Lifestyle,Dining Out
+eatery,Lifestyle,Dining Out
+grill,Lifestyle,Dining Out
+bistro,Lifestyle,Dining Out
+tavern,Lifestyle,Dining Out
+takeaway,Lifestyle,Takeaway/Coffee
+cafe,Lifestyle,Takeaway/Coffee
+bakery,Lifestyle,Takeaway/Coffee
+diner,Lifestyle,Takeaway/Coffee
+# Generic grocery terms — catches any unlisted supermarket or dairy
+supermarket,Essentials,Groceries
+fresh choice,Essentials,Groceries
+dairy,Essentials,Groceries
+# Online retailers
+temu,Shopping,Home & Garden
+shein,Shopping,Clothing
+aliexpress,Shopping,Home & Garden
+trademe,Shopping,Home & Garden
+ebay,Shopping,Home & Garden
+asos,Shopping,Clothing
+the iconic,Shopping,Clothing
+# Generic health terms — catches unlisted gyms, clinics, pharmacies
+gym,Health,Fitness
+fitness,Health,Fitness
+dental,Health,Medical
+optometrist,Health,Medical
+pharmacy,Health,Pharmacy
+chemist,Health,Pharmacy
