@@ -128,7 +128,7 @@ export default function ReviewPage() {
     >
       {/* Notifications */}
       {notifications.length > 0 && (
-        <div className="space-y-2 mb-4 max-w-2xl">
+        <div className="space-y-2 mb-4 max-w-5xl mx-auto w-full">
           {notifications.map((n) => (
             <div
               key={n.id}
@@ -157,7 +157,7 @@ export default function ReviewPage() {
           </LinkButton>
         </div>
       ) : hasData ? (
-        <div className="max-w-2xl">
+        <div className="max-w-5xl mx-auto w-full">
           <div className="rounded-lg border border-border">
             {transactions.map((tx, i) => {
               const isPending = pendingRef.current.has(tx.id);
