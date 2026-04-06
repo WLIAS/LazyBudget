@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { VERSION } from '@/lib/version';
 import {
   LayoutDashboard,
   Upload,
@@ -75,7 +76,7 @@ export function Sidebar() {
       {/* Footer */}
       <div className="px-5 py-4 border-t border-border">
         <p className="text-xs text-muted-foreground">All data stored locally</p>
-        <p className="text-[11px] text-muted-foreground/50 mt-0.5">v0.3.2</p>
+        <p className="text-[11px] text-muted-foreground/50 mt-0.5">{VERSION}</p>
       </div>
     </aside>
   );

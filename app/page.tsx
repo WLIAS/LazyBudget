@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Upload, AlertCircle, ArrowRight, TrendingUp, DollarSign, List } from 'lucide-react';
 import { PageShell } from '@/components/layout/page-shell';
+import { VERSION } from '@/lib/version';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { LinkButton } from '@/components/ui/link-button';
 import { CategoryBadge } from '@/components/transactions/category-badge';
@@ -59,7 +60,7 @@ export default function DashboardPage() {
     <PageShell
       title="Dashboard"
       description="Your financial overview"
-      badge="v0.3.2"
+      badge={VERSION}
     >
       <div className="space-y-6">
         {isEmpty ? (
