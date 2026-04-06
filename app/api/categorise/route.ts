@@ -1,10 +1,10 @@
 // app/api/categorise/route.ts — Server-side AI categorisation endpoint
+// Uses Google Gemini (free tier) via its OpenAI-compatible endpoint.
+// Set GEMINI_API_KEY in .env.local and Vercel env vars.
+// Get a free key at: https://aistudio.google.com/app/apikey
 
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
 import { MERCHANT_MAPPINGS, buildMerchantHints } from '@/lib/categorisation/merchant-mappings';
-
-const client = new Anthropic();
 
 export interface CategoriseRequest {
   transactions: Array<{
@@ -27,19 +27,10 @@ export interface CategoriseResult {
 }
 
 // Sort mappings longest-keyword-first so more specific entries win
-// ("uber eats" beats "uber" if both were present)
 const SORTED_MAPPINGS = [...MERCHANT_MAPPINGS].sort(
   (a, b) => b.keyword.length - a.keyword.length
 );
 
-/**
- * Match a transaction against merchant-mappings using space-stripped substring
- * comparison. Strips all whitespace from both the keyword and the combined
- * payee+description so that location suffixes don't break matching:
- *   keyword "new world" → "newworld"
- *   payee   "New World Birkenhead Birkenhead" → "newworldbirkenheadbirkenhead"
- * Returns the matched category IDs or null.
- */
 function matchMerchant(
   payee: string,
   description: string,
@@ -73,8 +64,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Step 1: Merchant-mapping pre-filter ───────────────────────────────────
-    // Deterministic, zero-latency, no API cost. Anything matched here skips
-    // Claude entirely.
     const merchantResults: CategoriseResult[] = [];
     const needsAI: typeof transactions = [];
 
@@ -87,12 +76,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // If everything was matched locally, skip the Claude call entirely
     if (needsAI.length === 0) {
       return NextResponse.json({ results: merchantResults });
     }
 
     // ── Step 2: AI categorisation for remaining transactions ──────────────────
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('[categorise] GEMINI_API_KEY is not set');
+      return NextResponse.json({ results: merchantResults });
+    }
+
     const categoryList = categories
       .map((c) => `  - ${c.id}: ${c.name} (${c.group})`)
       .join('\n');
@@ -119,20 +113,37 @@ ${buildMerchantHints()}`;
 
     const userPrompt = `Available categories:\n${categoryList}\n\nCategorise these transactions:\n${txList}`;
 
-    const message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4096,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
-    });
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gemini-2.0-flash-lite',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+        }),
+      }
+    );
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : '';
+    if (!response.ok) {
+      const err = await response.text();
+      console.error('[categorise] Gemini API error:', err);
+      return NextResponse.json({ results: merchantResults });
+    }
 
-    // Extract JSON array from response (handle any surrounding text)
+    const data = await response.json();
+    const text: string = data.choices?.[0]?.message?.content ?? '';
+
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
-      console.error('[categorise] No JSON array in response:', text);
-      return NextResponse.json({ results: merchantResults }); // return what we have
+      console.error('[categorise] No JSON array in Gemini response:', text);
+      return NextResponse.json({ results: merchantResults });
     }
 
     const aiResults: CategoriseResult[] = JSON.parse(jsonMatch[0]);
