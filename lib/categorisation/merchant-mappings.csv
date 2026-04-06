@@ -119,6 +119,16 @@ takeaway,Lifestyle,Takeaway/Coffee
 cafe,Lifestyle,Takeaway/Coffee
 bakery,Lifestyle,Takeaway/Coffee
 diner,Lifestyle,Takeaway/Coffee
+# Additional generic food terms added for chain coverage
+chicken,Lifestyle,Takeaway/Coffee
+kitchen,Lifestyle,Dining Out
+wok,Lifestyle,Dining Out
+pita,Lifestyle,Takeaway/Coffee
+juice,Lifestyle,Takeaway/Coffee
+mex,Lifestyle,Takeaway/Coffee
+japan,Lifestyle,Dining Out
+turkish,Lifestyle,Dining Out
+roast,Lifestyle,Dining Out
 # Generic grocery terms — catches any unlisted supermarket or dairy
 supermarket,Essentials,Groceries
 fresh choice,Essentials,Groceries
@@ -138,3 +148,27 @@ dental,Health,Medical
 optometrist,Health,Medical
 pharmacy,Health,Pharmacy
 chemist,Health,Pharmacy
+# Specific fast food & cafe chains not covered by any generic keyword above
+carls jr,Lifestyle,Takeaway/Coffee
+dennys,Lifestyle,Dining Out
+nandos,Lifestyle,Dining Out
+chicking,Lifestyle,Takeaway/Coffee
+popeyes,Lifestyle,Takeaway/Coffee
+wise boys,Lifestyle,Takeaway/Coffee
+katsubi,Lifestyle,Dining Out
+mad mex,Lifestyle,Takeaway/Coffee
+zambrero,Lifestyle,Takeaway/Coffee
+mexicali,Lifestyle,Takeaway/Coffee
+casablanca,Lifestyle,Dining Out
+paasha,Lifestyle,Dining Out
+winner winner,Lifestyle,Takeaway/Coffee
+chick'n eats,Lifestyle,Takeaway/Coffee
+hansan,Lifestyle,Dining Out
+gong cha,Lifestyle,Takeaway/Coffee
+chatime,Lifestyle,Takeaway/Coffee
+wishbone,Lifestyle,Takeaway/Coffee
+muffin break,Lifestyle,Takeaway/Coffee
+dunkin,Lifestyle,Takeaway/Coffee
+krispy kreme,Lifestyle,Takeaway/Coffee
+esquires,Lifestyle,Takeaway/Coffee
+night n day,Lifestyle,Takeaway/Coffee
