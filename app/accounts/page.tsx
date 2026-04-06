@@ -42,17 +42,32 @@ export default function AccountsPage() {
   const { dateRange } = useAppStore();
 
   const accounts = useLiveQuery(() => getDB().accounts.toArray());
-  const transactions = useLiveQuery(
-    () =>
-      getDB()
-        .transactions.orderBy('date')
-        .filter((t) => t.date >= dateRange.from && t.date <= dateRange.to)
-        .toArray(),
-    [dateRange.from, dateRange.to]
-  );
 
   // Confirmed transfer pairs live-queried so unflag updates reflect immediately
   const confirmedPairs = useLiveQuery(() => getConfirmedTransferPairs(), []);
+
+  // stats: own live query using toArray() so ANY write to transactions triggers
+  // a re-run — orderBy().filter() only tracks the date index key range, which
+  // doesn't change when isTransfer is updated, so it misses transfer confirmations.
+  const stats = useLiveQuery(
+    async () => {
+      const db = getDB();
+      const all = await db.transactions.toArray();
+      return (accounts ?? []).map((acc) => {
+        const txs = all.filter(
+          (t) =>
+            t.accountId === acc.id &&
+            !t.isTransfer &&
+            t.date >= dateRange.from &&
+            t.date <= dateRange.to
+        );
+        const inflow  = txs.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+        const outflow = txs.filter((t) => t.amount < 0).reduce((s, t) => s + t.amount, 0);
+        return { acc, inflow, outflow, count: txs.length };
+      });
+    },
+    [accounts, dateRange.from, dateRange.to]
+  );
 
   // Detection workflow state
   const [detectionState, setDetectionState] = useState<DetectionState>('idle');
@@ -66,16 +81,6 @@ export default function AccountsPage() {
     accounts?.forEach((a) => m.set(a.id, a.name));
     return m;
   }, [accounts]);
-
-  const stats = useMemo(() => {
-    if (!accounts || !transactions) return [];
-    return accounts.map((acc) => {
-      const txs = transactions.filter((t) => t.accountId === acc.id && !t.isTransfer);
-      const inflow = txs.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0);
-      const outflow = txs.filter((t) => t.amount < 0).reduce((s, t) => s + t.amount, 0);
-      return { acc, inflow, outflow, count: txs.length };
-    });
-  }, [accounts, transactions]);
 
   // Transfer flow summary: group confirmed pairs by (fromAccount → toAccount)
   const transferFlows = useMemo(() => {
@@ -170,7 +175,7 @@ export default function AccountsPage() {
 
           {/* ── Account cards ──────────────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stats.map(({ acc, inflow, outflow, count }) => (
+            {(stats ?? []).map(({ acc, inflow, outflow, count }) => (
               <Card key={acc.id}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-2">
