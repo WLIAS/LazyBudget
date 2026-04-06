@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Search, Upload, Sparkles, X } from 'lucide-react';
+import { Search, Upload, Sparkles, X, ChevronDown } from 'lucide-react';
 import { PageShell } from '@/components/layout/page-shell';
 import { TransactionTable } from '@/components/transactions/transaction-table';
 import { LinkButton } from '@/components/ui/link-button';
@@ -19,6 +19,8 @@ export default function TransactionsPage() {
   const [search, setSearch]           = useState('');
   const [categoryId, setCategoryId]   = useState('');
   const [typeFilter, setTypeFilter]   = useState<TypeFilter>('all');
+  const [catPickerOpen, setCatPickerOpen] = useState(false);
+  const catPickerRef = useRef<HTMLDivElement>(null);
   const [reclassifyState, setReclassifyState] = useState<ReclassifyState>('idle');
   const [reclassifyProgress, setReclassifyProgress] = useState<EngineProgress | null>(null);
   const [reclassifyResult, setReclassifyResult] = useState<EngineResult | null>(null);
@@ -54,6 +56,30 @@ export default function TransactionsPage() {
       return true;
     });
   }, [categories]);
+
+  // Group categories for multi-column picker
+  const catGroups = useMemo(() => {
+    const filtered = deduped.filter(
+      (c) => c.name !== 'Internal Transfer' && c.name !== 'Uncategorised'
+    );
+    const map = new Map<string, typeof filtered>();
+    for (const cat of filtered) {
+      if (!map.has(cat.group)) map.set(cat.group, []);
+      map.get(cat.group)!.push(cat);
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
+  }, [deduped]);
+
+  // Close cat picker on outside click
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (catPickerRef.current && !catPickerRef.current.contains(e.target as Node)) {
+        setCatPickerOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, []);
 
   const filtered = useMemo(() => {
     if (!transactions) return [];
@@ -162,18 +188,79 @@ export default function TransactionsPage() {
               />
             </div>
 
-            {/* Category filter */}
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="text-sm bg-input border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="">All categories</option>
-              <option value="__uncategorised__">Uncategorised</option>
-              {deduped.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            {/* Category filter — multi-column popover */}
+            <div ref={catPickerRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setCatPickerOpen((v) => !v)}
+                className={cn(
+                  'flex items-center gap-1.5 text-sm bg-input border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-ring',
+                  catPickerOpen && 'ring-1 ring-ring'
+                )}
+              >
+                <span className={cn(!categoryId && 'text-muted-foreground')}>
+                  {categoryId === ''
+                    ? 'All categories'
+                    : categoryId === '__uncategorised__'
+                    ? 'Uncategorised'
+                    : (deduped.find((c) => c.id === categoryId)?.name ?? 'All categories')}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 opacity-50 shrink-0" />
+              </button>
+
+              {catPickerOpen && (
+                <div className="absolute left-0 top-full mt-1 z-50 w-[640px] rounded-xl border border-border bg-popover shadow-xl overflow-hidden">
+                  <div className="p-3">
+                    {/* Special options */}
+                    <div className="flex gap-1 mb-3 pb-3 border-b border-border">
+                      <button
+                        type="button"
+                        onClick={() => { setCategoryId(''); setCatPickerOpen(false); }}
+                        className={cn(
+                          'text-sm px-3 py-1.5 rounded-md hover:bg-accent transition-colors',
+                          categoryId === '' && 'text-primary font-medium bg-primary/5'
+                        )}
+                      >
+                        All categories
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setCategoryId('__uncategorised__'); setCatPickerOpen(false); }}
+                        className={cn(
+                          'text-sm px-3 py-1.5 rounded-md hover:bg-accent transition-colors',
+                          categoryId === '__uncategorised__' && 'text-primary font-medium bg-primary/5'
+                        )}
+                      >
+                        Uncategorised
+                      </button>
+                    </div>
+                    {/* Grouped categories in columns */}
+                    <div style={{ columns: '3', columnGap: '0' }}>
+                      {catGroups.map(([group, cats]) => (
+                        <div key={group} style={{ breakInside: 'avoid' }} className="mb-3 pr-2">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 pb-1">
+                            {group}
+                          </p>
+                          {cats.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => { setCategoryId(cat.id); setCatPickerOpen(false); }}
+                              className={cn(
+                                'w-full text-left text-sm px-2 py-1.5 rounded-md hover:bg-accent transition-colors',
+                                categoryId === cat.id && 'text-primary font-medium bg-primary/5'
+                              )}
+                            >
+                              {cat.name}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Debit / Credit toggle */}
             <div className="flex rounded-lg border border-border overflow-hidden text-sm">
