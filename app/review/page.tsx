@@ -158,7 +158,7 @@ export default function ReviewPage() {
         </div>
       ) : hasData ? (
         <div className="max-w-2xl">
-          <div className="rounded-lg border border-border overflow-hidden">
+          <div className="rounded-lg border border-border">
             {transactions.map((tx, i) => {
               const isPending = pendingRef.current.has(tx.id);
               return (

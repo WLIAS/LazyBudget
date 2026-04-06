@@ -87,7 +87,7 @@ export function CategoryPicker({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1 z-50 w-[640px] rounded-xl border border-border bg-popover shadow-xl overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 z-50 w-[640px] rounded-xl border border-border bg-popover shadow-xl overflow-hidden">
           {/* Search */}
           <div className="p-2.5 border-b border-border">
             <div className="relative">
@@ -120,7 +120,7 @@ export function CategoryPicker({
                         type="button"
                         onClick={() => select(cat.id)}
                         className={cn(
-                          'w-full text-left text-sm px-2 py-1.5 rounded-md transition-colors flex items-center justify-between gap-2 hover:bg-accent hover:text-accent-foreground cursor-pointer',
+                          'w-full text-left text-sm px-2 py-1.5 rounded-md transition-colors flex items-center justify-between gap-2 hover:bg-white/10 cursor-pointer',
                           value === cat.id && 'text-primary font-medium bg-primary/5'
                         )}
                       >
