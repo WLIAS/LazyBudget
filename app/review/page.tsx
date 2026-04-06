@@ -126,17 +126,21 @@ export default function ReviewPage() {
           : 'Loading…'
       }
     >
-      {/* Notifications */}
+      {/* Notifications — fixed center-screen toast */}
       {notifications.length > 0 && (
-        <div className="space-y-2 mb-4 max-w-5xl mx-auto w-full">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none">
           {notifications.map((n) => (
             <div
               key={n.id}
-              className="flex items-center justify-between gap-3 rounded-lg bg-[#34D399]/10 border border-[#34D399]/20 px-4 py-2.5 text-sm text-[#34D399]"
+              className="pointer-events-auto flex items-center gap-3 rounded-xl bg-[#111827] border border-[#34D399]/30 shadow-xl px-5 py-3 text-sm text-[#34D399]"
             >
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{n.message}</span>
-              <button onClick={() => setNotifications((p) => p.filter((x) => x.id !== n.id))}>
-                <X className="w-3.5 h-3.5 opacity-60 hover:opacity-100" />
+              <button
+                onClick={() => setNotifications((p) => p.filter((x) => x.id !== n.id))}
+                className="ml-1 opacity-50 hover:opacity-100"
+              >
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}
