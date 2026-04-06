@@ -19,6 +19,8 @@ genesis energy,Essentials,Utilities
 contact energy,Essentials,Utilities
 trustpower,Essentials,Utilities
 powershop,Essentials,Utilities
+watercare,Essentials,Utilities
+vector,Essentials,Utilities
 spark,Essentials,Internet/Phone
 vodafone,Essentials,Internet/Phone
 one nz,Essentials,Internet/Phone
@@ -33,6 +35,7 @@ at hop,Transport,Public Transport
 auckland transport,Transport,Public Transport
 snapper,Transport,Public Transport
 metlink,Transport,Public Transport
+uber trip,Transport,Public Transport
 wilson parking,Transport,Parking
 care park,Transport,Parking
 vtnz,Transport,Vehicle Maintenance
@@ -41,16 +44,20 @@ tonys tyre,Transport,Vehicle Maintenance
 mcdonalds,Lifestyle,Takeaway/Coffee
 kfc,Lifestyle,Takeaway/Coffee
 burger king,Lifestyle,Takeaway/Coffee
+wendys,Lifestyle,Takeaway/Coffee
 subway,Lifestyle,Takeaway/Coffee
 dominos,Lifestyle,Takeaway/Coffee
 starbucks,Lifestyle,Takeaway/Coffee
 coffee club,Lifestyle,Takeaway/Coffee
+uber eats,Lifestyle,Takeaway/Coffee
+ubereats,Lifestyle,Takeaway/Coffee
 event cinemas,Lifestyle,Entertainment
 hoyts,Lifestyle,Entertainment
 skycity,Lifestyle,Entertainment
-netflix,Lifestyle,Subscriptions
-spotify,Lifestyle,Subscriptions
-disney,Lifestyle,Subscriptions
+netflix,Lifestyle,Entertainment
+spotify,Lifestyle,Entertainment
+disney,Lifestyle,Entertainment
+youtube,Lifestyle,Entertainment
 apple,Lifestyle,Subscriptions
 google,Lifestyle,Subscriptions
 amazon,Lifestyle,Subscriptions

@@ -20,6 +20,7 @@ export class LazyBudgetDB extends Dexie {
 
   constructor() {
     super('LazyBudgetDB');
+
     // v1 — original schema
     this.version(1).stores({
       transactions:
@@ -30,6 +31,7 @@ export class LazyBudgetDB extends Dexie {
       budgets: 'id, categoryId, period, effectiveFrom',
       importBatches: 'id, accountId, importedAt',
     });
+
     // v2 — transactions now use deterministic hash IDs; clear old UUID-keyed data
     this.version(2)
       .stores({
@@ -68,6 +70,19 @@ export class LazyBudgetDB extends Dexie {
           .map((c) => c.id);
         if (toDelete.length > 0) await tx.table('categories').bulkDelete(toDelete);
       });
+
+    // v4 — add matchValue index to rules table
+    // Bug: createRule used db.rules.where('matchValue') on an unindexed field,
+    // causing Dexie to throw on every save → catch block silently skipped propagation.
+    this.version(4).stores({
+      transactions:
+        'id, date, accountId, categoryId, payee, importBatchId, isTransfer, categorySource',
+      accounts: 'id, name, label',
+      categories: 'id, name, group, isSystem',
+      rules: 'id, type, matchField, matchValue, categoryId, priority, createdBy',
+      budgets: 'id, categoryId, period, effectiveFrom',
+      importBatches: 'id, accountId, importedAt',
+    });
   }
 }
 

@@ -8,8 +8,9 @@ import type { BankProfile } from './bank-profiles';
 function cleanPayee(raw: string): string {
   return raw
     .replace(/\s+/g, ' ')
-    .replace(/^\d{2,}[\s-]+/, '')       // strip leading account numbers
-    .replace(/\*\d+/g, '')              // strip card numbers like *1234
+    .replace(/^\d{2,}[\s-]+/, '')             // strip leading account numbers
+    .replace(/\*\s*/g, ' ')                   // normalise asterisks: UBER* EATS → UBER EATS
+    .replace(/\.(COM|NET|ORG|CO)([A-Z])/g, '.$1 $2') // NETFLIX.COMLOS → NETFLIX.COM LOS
     .replace(/\s{2,}/g, ' ')
     .trim();
 }

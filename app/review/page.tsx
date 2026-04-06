@@ -66,17 +66,21 @@ export default function ReviewPage() {
         confidence: 1.0,
       });
 
-      // 2. Create / upsert exact-match rule for this payee
-      await createRule({
-        type: 'exact',
-        matchField: 'payee',
-        matchValue: tx.payee || tx.rawPayee,
-        categoryId,
-        priority: 100,
-        createdBy: 'user',
-      });
+      // 2. Create / upsert exact-match rule — isolated so failure doesn't block propagation
+      try {
+        await createRule({
+          type: 'exact',
+          matchField: 'payee',
+          matchValue: tx.payee || tx.rawPayee,
+          categoryId,
+          priority: 100,
+          createdBy: 'user',
+        });
+      } catch (e) {
+        console.error('[review] createRule failed (propagation will still run):', e);
+      }
 
-      // 3. Apply to ALL other transactions with the same payee (any category state)
+      // 3. Apply to ALL other transactions with the same payee
       const payeeKey = (tx.payee || tx.rawPayee).toLowerCase();
       const all = await getDB().transactions.toArray();
       const samePayee = all.filter(
