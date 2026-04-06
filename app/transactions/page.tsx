@@ -217,7 +217,7 @@ export default function TransactionsPage() {
                         type="button"
                         onClick={() => { setCategoryId(''); setCatPickerOpen(false); }}
                         className={cn(
-                          'text-sm px-3 py-1.5 rounded-md hover:bg-accent transition-colors',
+                          'text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors',
                           categoryId === '' && 'text-primary font-medium bg-primary/5'
                         )}
                       >
@@ -227,7 +227,7 @@ export default function TransactionsPage() {
                         type="button"
                         onClick={() => { setCategoryId('__uncategorised__'); setCatPickerOpen(false); }}
                         className={cn(
-                          'text-sm px-3 py-1.5 rounded-md hover:bg-accent transition-colors',
+                          'text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors',
                           categoryId === '__uncategorised__' && 'text-primary font-medium bg-primary/5'
                         )}
                       >
@@ -247,7 +247,7 @@ export default function TransactionsPage() {
                               type="button"
                               onClick={() => { setCategoryId(cat.id); setCatPickerOpen(false); }}
                               className={cn(
-                                'w-full text-left text-sm px-2 py-1.5 rounded-md hover:bg-accent transition-colors',
+                                'w-full text-left text-sm px-2 py-1.5 rounded-md hover:bg-white/10 transition-colors',
                                 categoryId === cat.id && 'text-primary font-medium bg-primary/5'
                               )}
                             >
@@ -272,7 +272,7 @@ export default function TransactionsPage() {
                     'px-3 py-1.5 capitalize transition-colors',
                     typeFilter === t
                       ? 'bg-primary text-primary-foreground font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/10'
                   )}
                 >
                   {t}

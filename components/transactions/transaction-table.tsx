@@ -1,10 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import type { Transaction, Account, Category } from '@/lib/db/schema';
 import { formatMoney } from '@/lib/utils/money';
 import { formatDateShort } from '@/lib/utils/dates';
-import { CategoryBadge } from './category-badge';
+import { CategoryPicker } from '@/components/ui/category-picker';
+import { updateTransaction } from '@/lib/db/transactions';
+import { createRule } from '@/lib/db/rules';
+import { getDB } from '@/lib/db/index';
 import { cn } from '@/lib/utils';
 import { ArrowUpDown } from 'lucide-react';
 
@@ -20,6 +23,31 @@ type SortDir = 'asc' | 'desc';
 export function TransactionTable({ transactions, accounts, categories }: TransactionTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const pendingRef = useRef<Set<string>>(new Set());
+  const [, forceUpdate] = useState(0);
+
+  async function handleCategoryChange(tx: Transaction, categoryId: string) {
+    if (pendingRef.current.has(tx.id)) return;
+    pendingRef.current.add(tx.id);
+    forceUpdate((n) => n + 1);
+    try {
+      await updateTransaction(tx.id, { categoryId, categorySource: 'user', confidence: 1.0 });
+      try {
+        await createRule({ type: 'exact', matchField: 'payee', matchValue: tx.payee || tx.rawPayee, categoryId, priority: 100, createdBy: 'user' });
+      } catch {}
+      const payeeKey = (tx.payee || tx.rawPayee).toLowerCase();
+      const all = await getDB().transactions.toArray();
+      const samePayee = all.filter(
+        (t) => t.id !== tx.id && !t.isTransfer && (t.payee || t.rawPayee).toLowerCase() === payeeKey
+      );
+      if (samePayee.length > 0) {
+        await Promise.all(samePayee.map((t) => updateTransaction(t.id, { categoryId, categorySource: 'rule', confidence: 1.0 })));
+      }
+    } finally {
+      pendingRef.current.delete(tx.id);
+      forceUpdate((n) => n + 1);
+    }
+  }
 
   const accountMap = useMemo(
     () => new Map(accounts.map((a) => [a.id, a])),
@@ -68,7 +96,7 @@ export function TransactionTable({ transactions, accounts, categories }: Transac
   }
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden">
+    <div className="rounded-lg border border-border">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="border-b border-border bg-muted/30">
@@ -100,7 +128,13 @@ export function TransactionTable({ transactions, accounts, categories }: Transac
                     <p className="truncate text-xs text-muted-foreground">{tx.description}</p>
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
-                    <CategoryBadge category={category} source={tx.categorySource} />
+                    <CategoryPicker
+                      categories={categories}
+                      value={tx.categoryId ?? null}
+                      onChange={(catId) => handleCategoryChange(tx, catId)}
+                      disabled={pendingRef.current.has(tx.id)}
+                      className="w-40"
+                    />
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
                     <span className="text-xs text-muted-foreground">{account?.name ?? '—'}</span>
