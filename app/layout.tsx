@@ -4,6 +4,7 @@ import './globals.css';
 import { Sidebar, MobileNav } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { DbSeed } from '@/components/db-seed';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`dark ${dmSans.variable} ${jetbrainsMono.variable}`}>
       <body className="antialiased bg-background text-foreground">
         <TooltipProvider>
+          <DbSeed />
           <div className="flex min-h-screen">
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0">
