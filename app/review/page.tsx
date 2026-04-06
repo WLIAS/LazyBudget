@@ -11,7 +11,7 @@ import { getDB } from '@/lib/db/index';
 import { updateTransaction } from '@/lib/db/transactions';
 import { createRule } from '@/lib/db/rules';
 import { formatMoney } from '@/lib/utils/money';
-import { formatDateShort } from '@/lib/utils/dates';
+import { formatDateDMY } from '@/lib/utils/dates';
 import { cn } from '@/lib/utils';
 import type { Transaction } from '@/lib/db/schema';
 
@@ -49,6 +49,13 @@ export default function ReviewPage() {
   );
 
   const categories = useLiveQuery(() => getDB().categories.toArray());
+  const accounts   = useLiveQuery(() => getDB().accounts.toArray());
+
+  const accountMap = useMemo(() => {
+    const m = new Map<string, string>();
+    accounts?.forEach((a) => m.set(a.id, a.name));
+    return m;
+  }, [accounts]);
 
   const deduped = useMemo(() => {
     if (!categories) return [];
@@ -304,7 +311,8 @@ export default function ReviewPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{tx.payee || tx.rawPayee}</p>
                       <p className="text-xs text-muted-foreground">
-                        {formatDateShort(tx.date)}
+                        {formatDateDMY(tx.date)}
+                        {accountMap.get(tx.accountId) ? ` · ${accountMap.get(tx.accountId)}` : ''}
                         {tx.description ? ` · ${tx.description}` : ''}
                       </p>
                     </div>

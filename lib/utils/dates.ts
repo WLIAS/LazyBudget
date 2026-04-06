@@ -10,6 +10,11 @@ export function formatDateShort(iso: string): string {
   return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' });
 }
 
+export function formatDateDMY(iso: string): string {
+  const [y, m, day] = iso.split('-');
+  return `${day}/${m}/${y}`;
+}
+
 export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
