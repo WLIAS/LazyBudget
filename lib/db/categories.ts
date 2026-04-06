@@ -51,6 +51,10 @@ const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { group: 'Other', name: 'Uncategorised',        icon: 'HelpCircle',    colour: '#6B7280', isSystem: true },
   // Lifestyle (continued)
   { group: 'Lifestyle', name: 'Alcohol',           icon: 'Wine',          colour: '#F87171', isSystem: true },
+  // Health (continued)
+  { group: 'Health', name: 'Personal Care',        icon: 'Sparkles',      colour: '#A78BFA', isSystem: true },
+  // Other (continued)
+  { group: 'Other', name: 'Discretionary Spending', icon: 'ShoppingBag',  colour: '#6B7280', isSystem: true },
 ];
 
 // Fixed IDs so the seed is idempotent across DB reopens
