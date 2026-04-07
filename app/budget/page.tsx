@@ -132,7 +132,14 @@ function ChartTooltip({
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.fill }} />
             <span className="text-muted-foreground truncate max-w-[110px]">{p.dataKey}</span>
           </div>
-          <span className="font-mono font-medium">{formatMoney(p.value)}</span>
+          <span className="font-mono font-medium">
+            {formatMoney(p.value)}
+            {total > 0 && (
+              <span className="text-muted-foreground font-normal ml-1">
+                ({((p.value / total) * 100).toFixed(0)}%)
+              </span>
+            )}
+          </span>
         </div>
       ))}
       {payload.length > 1 && (
