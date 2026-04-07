@@ -451,7 +451,7 @@ export default function BudgetPage() {
                   style={{ cursor: 'pointer' }}
                   onClick={(state) => {
                     const idx = state?.activeTooltipIndex;
-                    if (idx !== undefined) setActivePeriodIdx(idx);
+                    if (typeof idx === 'number') setActivePeriodIdx(idx);
                   }}
                 >
                   <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.08} />
